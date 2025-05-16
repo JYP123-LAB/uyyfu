@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>豆科植物学习游戏</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="quizArea">
+        <h2 id="progress">第1题 / 共10题</h2>
+        <img id="plantImage" alt="植物图片" loading="lazy">
+        <!-- 新增问题显示区域 -->
+        <h3 id="questionText"></h3>
+        <div id="options"></div>
+        <div id="result"></div>
+        <div id="infoCard" class="card"></div>
+        <button id="nextBtn" disabled>下一题 →</button>
+    </div>
+
+    <script>
+        // 原始完整题库（保持原有34题数据）
+        const allQuestions = [{
+    "image": "images/1-紫藤.jpg",
+    "question": "紫藤花的颜色通常是？",
+    "options": ["紫色", "白色", "黄色", "粉色"],
+    "answer": "紫色",
+    "info": "紫藤作为大型藤本植物，花冠紫色长2-2.5厘米，旗瓣反折且基部有柱状眼体。虽然文档提到存在白色变型（Wisteria sinensis f. alba），但原变型典型花色为紫色，这也是园林栽培中最常见的颜色，紫色总状花序长达30厘米形成壮观景观。"
+  },
+  {
+    "image": "images/1-紫藤.jpg",
+    "question": "紫藤的攀援方式是？",
+    "options": ["左旋缠绕", "右旋缠绕", "气生根吸附", "卷须攀附"],
+    "answer": "左旋缠绕",
+    "info": "紫藤茎粗壮且具有左旋缠绕特性，这是蝶形花亚科藤本植物的典型特征。其嫩枝黄褐色被白色绢毛，长达20余米的生长长度依靠左旋茎干攀援支撑。"
+  },
+  {
+    "image": "images/2-刺槐.jpg",
+    "question": "刺槐的托叶特化为？",
+    "options": ["刺状", "叶状", "膜质鞘", "卷须"],
+    "answer": "刺状",
+    "info": "刺槐最显著的特征是具托叶刺，这是识别该物种的关键特征。其羽状复叶和小枝初被毛后变光滑的特点，结合白色下垂总状花序，构成典型的刺槐形态。"
+  },
+  {
+    "image": "images/2-刺槐.jpg",
+    "question": "刺槐果实的显著特征是？",
+    "options": ["腹缝线具窄翅", "密被茸毛", "念珠状", "肉质果皮"],
+    "answer": "腹缝线具窄翅",
+    "info": "刺槐荚果线状长圆形，沿腹缝线具有明显窄翅，这一结构特征使其区别于其他豆科树种。褐色荚果扁平无毛，宿存花萼也是重要识别点。"
+  },
+  {
+    "image": "images/3-黄檀.jpg",
+    "question": "黄檀属植物的典型果实类型是？",
+    "options": ["具网纹荚果", "浆果", "核果", "蒴果"],
+    "answer": "具网纹荚果",
+    "info": "黄檀的荚果长圆形，果瓣对种子部分有显著网纹，这是黄檀属（Dalbergia）的重要鉴别特征。其乔木形态和淡紫色小花结合网状纹路的荚果，构成完整识别体系。"
+  },
+  {
+    "image": "images/3-黄檀.jpg",
+    "question": "黄檀的花药排列方式是？",
+    "options": ["二体雄蕊", "单体雄蕊", "四强雄蕊", "聚药雄蕊"],
+    "answer": "二体雄蕊",
+    "info": "黄檀雄蕊10枚排列为5+5的二体雄蕊结构，这是蝶形花亚科的典型特征。其白或淡紫色小花具有旗瓣圆形无附属体的特点，结合二体雄蕊可准确鉴定。"
+  },
+  {
+    "image": "images/4-两型豆.jpg",
+    "question": "两型豆的特殊繁殖策略是？",
+    "options": ["地上地下两种花", "寄生生长", "胎生繁殖", "闭花授粉"],
+    "answer": "地上地下两种花",
+    "info": "两型豆最显著的特征是产生两种类型的花：地上正常花（淡紫色）和地下闭锁花。这种独特的繁殖策略确保在恶劣环境下仍能通过地下结实保证繁衍。"
+  },
+  {
+    "image": "images/4-两型豆.jpg",
+    "question": "两型豆的茎部特征是？",
+    "options": ["纤细缠绕", "直立木质化", "匍匐生长", "具刺"],
+    "answer": "纤细缠绕",
+    "info": "作为一年生缠绕草本，两型豆茎纤细长达1.3米，这个特征结合其三出复叶和被毛特点，使其在豆科草本植物中具有明显识别特征。"
+  },
+  {
+    "image": "images/5-黄香草木犀.jpg",
+    "question": "黄香草木犀的典型花色是？",
+    "options": ["黄色", "白色", "紫色", "红色"],
+    "answer": "黄色",
+    "info": "黄香草木犀作为二年生草本，最显著特征是总状花序上密集的黄色小花，旗瓣倒卵形与翼瓣近等长。其荚果卵形表面具横向网纹也是重要特征。"
+  },
+  {
+    "image": "images/5-黄香草木犀.jpg",
+    "question": "该植物的叶序类型是？",
+    "options": ["羽状三出复叶", "单叶互生", "掌状复叶", "二回羽状复叶"],
+    "answer": "羽状三出复叶",
+    "info": "黄香草木犀具有典型的羽状三出复叶，小叶倒卵形边缘具疏齿，叶柄细长。这个特征结合植株被柔毛和特殊香气，构成其识别要点。"
+  },
+  {
+    "image": "images/6-天蓝苜蓿.jpg",
+    "question": "天蓝苜蓿成熟后的荚果呈现什么颜色？",
+    "options": ["绿色", "红色", "黑色", "棕色"],
+    "answer": "黑色",
+    "info": "天蓝苜蓿的荚果肾形，表面具同心弧形脉纹，成熟时变黑。其种子卵形褐色，与黄色花冠形成鲜明对比，这种颜色变化是重要的成熟期识别特征。"
+  },
+  {
+    "image": "images/6-天蓝苜蓿.jpg",
+    "question": "天蓝苜蓿的花序类型是？",
+    "options": ["总状花序", "伞形花序", "小头状花序", "圆锥花序"],
+    "answer": "小头状花序",
+    "info": "天蓝苜蓿具典型的小头状花序，每个花序密集着生10-20朵黄色小花，总花梗细长挺直且超过叶长，是其区别于其他苜蓿的重要形态特征。"
+  },
+  {
+    "image": "images/7-大巢菜.jpg",
+    "question": "大巢菜的荚果形态特征是？",
+    "options": ["线形扁平", "球形带刺", "长圆形菱形", "肾形有网纹"],
+    "answer": "长圆形菱形",
+    "info": "大巢菜的荚果长1-2厘米，呈长圆形或菱形，两面急尖，表皮棕色，这种独特的扁平菱形形态是野豌豆属的典型特征。"
+  },
+  {
+    "image": "images/7-大巢菜.jpg",
+    "question": "大巢菜的花冠颜色不包括以下哪种？",
+    "options": ["雪青色", "粉红色", "纯白色", "亮黄色"],
+    "answer": "亮黄色",
+    "info": "大巢菜花冠为白色、粉红色、紫色或雪青色，而亮黄色是黄香草木犀等植物的特征花色。"
+  },
+  {
+    "image": "images/8-小巢菜.jpg",
+    "question": "小巢菜的荚果表面具有什么特殊结构？",
+    "options": ["蜡质层", "翅状突起", "长硬毛", "瘤状凸起"],
+    "answer": "长硬毛",
+    "info": "小巢菜的荚果长圆菱形，表面密被棕褐色长硬毛，这是区分其与大巢菜的关键特征（大巢菜荚果无毛）。"
+  },
+  {
+    "image": "images/8-小巢菜.jpg",
+    "question": "小巢菜每朵花通常有多少胚珠？",
+    "options": ["1", "2", "4", "6-8"],
+    "answer": "2",
+    "info": "小巢菜子房无柄且密被褐色长硬毛，每朵花仅含2枚胚珠，最终形成2粒扁圆形种子，体现\"二籽巢菜\"的命名来源。"
+  },
+  {
+    "image": "images/9-小槐花.jpg",
+    "question": "小槐花的旗瓣具有什么显著特征？",
+    "options": ["基部有眼体", "边缘流苏状", "明显脉纹", "金属光泽"],
+    "answer": "明显脉纹",
+    "info": "小槐花虽花小（长约5毫米），但花冠绿白或黄白色，旗瓣椭圆形带有明显脉纹，这是其重要的显微识别特征。"
+  },
+  {
+    "image": "images/9-小槐花.jpg",
+    "question": "小槐花荚节的典型长度范围是？",
+    "options": ["3-5毫米", "9-12毫米", "15-20毫米", "25-30毫米"],
+    "answer": "9-12毫米",
+    "info": "其线形荚果有4-8节，每节长圆形且长0.9-1.2厘米，被伸展钩状毛，这种分节形态是大井氏属的典型特征。"
+  },
+  {
+    "image": "images/10-庭藤.jpg",
+    "question": "庭藤的雌蕊胚珠数量通常是？",
+    "options": ["1-3粒", "5-6粒", "10余粒", "20粒以上"],
+    "answer": "10余粒",
+    "info": "庭藤子房无毛但胚珠数量达10余粒，最终形成含7-8粒种子的圆柱形荚果，体现木蓝属植物的多籽特性。"
+  },
+  {
+    "image": "images/10-庭藤.jpg",
+    "question": "庭藤的龙骨瓣具有什么特殊结构？",
+    "options": ["距状突起", "流苏边缘", "瓣柄延长", "锯齿缺刻"],
+    "answer": "距状突起",
+    "info": "其龙骨瓣与翼瓣近等长且具有短距，这种距状结构是木蓝属植物花器官的典型特征，与授粉机制密切相关。"
+  },
+  {
+    "image": "images/11-马棘.jpg",
+    "question": "马棘的花冠颜色主要是？",
+    "options": ["白色", "黄色", "紫色", "蓝色"],
+    "answer": "紫色",
+    "info": "马棘（河北木蓝）花冠紫色或紫红色，旗瓣阔倒卵形且被丁字毛，是其区别于其他木蓝属植物的显著特征。"
+  },
+  {
+    "image": "images/11-马棘.jpg",
+    "question": "马棘的荚果表面具有什么特征？",
+    "options": ["光滑无毛", "白色蜡质", "紫红斑点", "网状凸起"],
+    "answer": "紫红斑点",
+    "info": "其荚果线状圆柱形，内果皮具紫红色斑点，种子椭圆形，这一特征是识别马棘成熟果实的标志。"
+  },
+  {
+    "image": "images/12-白车轴草.jpg",
+    "question": "白车轴草的花序类型是？",
+    "options": ["穗状花序", "伞形花序", "头状花序", "圆锥花序"],
+    "answer": "头状花序",
+    "info": "白车轴草具典型的球形头状花序，直径1.5-4厘米，含20-50朵密集小花，顶生于长总花梗上。"
+  },
+  {
+    "image": "images/12-白车轴草.jpg",
+    "question": "白车轴草的典型小叶脉特征是？",
+    "options": ["无侧脉", "侧脉13对", "羽状脉", "平行脉"],
+    "answer": "侧脉13对",
+    "info": "小叶倒卵形具13对侧脉，两面隆起且在叶缘分叉达齿尖，是白车轴草叶片的独特脉序特征。"
+  },
+  {
+    "image": "images/13-葛.jpg",
+    "question": "葛的花冠颜色是？",
+    "options": ["白色", "黄色", "紫色", "红色"],
+    "answer": "紫色",
+    "info": "葛的花冠紫色，旗瓣倒卵形基部具耳状附属体，总状花序长达30厘米，是其重要的观赏特征。"
+  },
+  {
+    "image": "images/13-葛.jpg",
+    "question": "葛的茎基部具有什么特殊结构？",
+    "options": ["刺状突起", "块状根", "气生根", "鳞片叶"],
+    "answer": "块状根",
+    "info": "葛为粗壮藤本，茎基部木质化并具粗厚的块状根，这一结构是其重要的药用部位来源。"
+  },
+  {
+    "image": "images/14-土圞儿.jpg",
+    "question": "土圞儿的块根形态是？",
+    "options": ["线形须根", "球状块根", "块茎膨大", "纺锤形根"],
+    "answer": "球状块根",
+    "info": "土圞儿具典型球状或卵状块根，是其营养繁殖器官，也是民间药用部位的重要识别特征。"
+  },
+  {
+    "image": "images/14-土圞儿.jpg",
+    "question": "土圞儿的花冠中哪个花瓣最长？",
+    "options": ["旗瓣", "翼瓣", "龙骨瓣", "均等长"],
+    "answer": "龙骨瓣",
+    "info": "其花冠黄绿色，龙骨瓣卷曲成半圆形且明显长于旗瓣和翼瓣，是豆科植物中少见的形态特征。"
+  },
+  {
+    "image": "images/15-宽卵叶长柄山蚂蝗.jpg",
+    "question": "宽卵叶长柄山蚂蝗的顶生小叶形态是？",
+    "options": ["线形", "披针形", "宽倒卵形", "心形"],
+    "answer": "宽倒卵形",
+    "info": "顶生小叶宽倒卵形，长4-7厘米，先端凸尖，基部楔形，是全叶最宽大的部分，构成三出复叶的主体形态。"
+  },
+  {
+    "image": "images/15-宽卵叶长柄山蚂蝗.jpg",
+    "question": "该植物的荚节间凹陷深度如何？",
+    "options": ["浅凹", "深达腹缝线", "无凹陷", "环状缢缩"],
+    "answer": "深达腹缝线",
+    "info": "荚节背缝线深凹入达腹缝线，形成明显的两节荚果，这是长柄山蚂蝗属植物的典型分节特征。"
+  },
+  {
+    "image": "images/16-长柄山蚂蝗.jpg",
+    "question": "长柄山蚂蝗的雄蕊类型是？",
+    "options": ["单体雄蕊", "二体雄蕊", "四强雄蕊", "聚药雄蕊"],
+    "answer": "单体雄蕊",
+    "info": "其雄蕊全部合生成单体雄蕊筒，这一特征在蝶形花亚科中较为特殊，是分类鉴定的重要依据。"
+  },
+  {
+    "image": "images/16-长柄山蚂蝗.jpg",
+    "question": "该植物小叶的侧脉数量是？",
+    "options": ["2-3对", "4条每边", "6-8对", "无侧脉"],
+    "answer": "4条每边",
+    "info": "顶生小叶侧脉每边约4条，平行直达叶缘且不分叉，是其叶片脉序的显著识别特征。"
+  },
+  {
+    "image": "images/17-胡枝子.jpg",
+    "question": "胡枝子的典型花色是？",
+    "options": ["白色", "黄色", "红紫色", "蓝色"],
+    "answer": "红紫色",
+    "info": "胡枝子花冠红紫色，旗瓣倒卵形，总状花序构成大型圆锥花序，形成夏末秋初的观赏盛景。"
+  },
+  {
+    "image": "images/17-胡枝子.jpg",
+    "question": "胡枝子的小叶质地属于？",
+    "options": ["肉质", "草质", "革质", "纸质"],
+    "answer": "草质",
+    "info": "其羽状三出复叶的小叶呈草质，卵形或倒卵形，先端圆钝具短刺尖，体现耐旱的形态适应。"
+  }     ];
+
+        // 当前使用的题目和进度
+        let selectedQuestions = [];
+        let currentQ = 0;
+
+        // 初始化题目选择
+        function initQuestions() {
+            // 1. 创建题库副本并打乱顺序
+            let shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
+            
+            // 2. 选择10题且保证同一植物不重复
+            const usedImages = new Set();
+            selectedQuestions = shuffled.filter(q => {
+                if (selectedQuestions.length >= 10) return false;
+                if (!usedImages.has(q.image)) {
+                    usedImages.add(q.image);
+                    return true;
+                }
+                return false;
+            }).slice(0, 10);
+        }
+
+        // DOM元素引用
+        const DOM = {
+            plantImage: document.getElementById('plantImage'),
+            questionText: document.getElementById('questionText'),
+            options: document.getElementById('options'),
+            result: document.getElementById('result'),
+            infoCard: document.getElementById('infoCard'),
+            nextBtn: document.getElementById('nextBtn'),
+            progress: document.getElementById('progress'),
+            quizArea: document.getElementById('quizArea')
+        };
+
+        function loadQuestion() {
+            const q = selectedQuestions[currentQ];
+            DOM.plantImage.src = q.image;
+            DOM.questionText.textContent = q.question; // 显示问题文本
+            DOM.options.innerHTML = q.options.map((opt, i) => 
+                `<button data-index="${i}">${String.fromCharCode(65+i)}. ${opt}</button>`
+            ).join('');
+            
+            DOM.options.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', () => checkAnswer(parseInt(btn.dataset.index)));
+            });
+            
+            DOM.progress.textContent = `第${currentQ+1}题 / 共10题`;
+        }
+
+        function checkAnswer(selected) {
+            const q = selectedQuestions[currentQ];
+            const isCorrect = q.options[selected] === q.answer;
+            
+            DOM.result.innerHTML = `<span class="${isCorrect ? 'correct' : 'wrong'}">
+                ${isCorrect ? '✅ 正确！' : '❌ 错误，正确答案是：'+q.answer}
+            </span>`;
+            
+            DOM.infoCard.innerHTML = `<h3>知识拓展</h3>${q.info}`;
+            DOM.infoCard.style.display = 'block';
+            DOM.nextBtn.disabled = false;
+        }
+
+        function nextQuestion() {
+            if(++currentQ >= 10) {
+                showCompletion();
+                return;
+            }
+            
+            DOM.result.innerHTML = '';
+            DOM.infoCard.style.display = 'none';
+            DOM.nextBtn.disabled = true;
+            loadQuestion();
+        }
+
+        function showCompletion() {
+            DOM.quizArea.innerHTML = `
+                <h2>恭喜完成所有题目！</h2>
+                <p>扫描二维码分享给朋友</p>
+                <div id="qrcode"></div>
+            `;
+            new QRCode(document.getElementById('qrcode'), {
+                text: window.location.href,
+                width: 150,
+                height: 150
+            });
+        }
+
+        window.addEventListener('load', () => {
+            initQuestions(); // 每次加载时初始化题目
+            loadQuestion();
+            DOM.nextBtn.addEventListener('click', nextQuestion);
+        });
+    </script>
+    <script src="https://cdn.staticfile.org/qrcodejs/1.5.0/qrcode.min.js"></script>
+</body>
+</html>
